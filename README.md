@@ -42,11 +42,74 @@ flowchart LR
 * **Amazon CloudWatch:** Real-time logging framework providing audit controls and telemetry.
 * **Terraform (IaC):** Explicit declarative blueprint mapping cloud resources and access planes.
 
+## Project Structure
+
 ```bash
 terraform/
 ├── main.tf            # Core AWS Resource Orchestration & Event Source Mappings
 ├── terraform.tf       # Provider Locks & State Locking Configurations
 └── lambda_function.py # Python-based Asynchronous Stream Event Handler
 ```
+
+## Example Ingestion Payload (DynamoDB Stream Event)
+
+```json
+{
+  "Records": [
+    {
+      "eventName": "INSERT",
+      "eventSource": "aws:dynamodb",
+      "dynamodb": {
+        "NewImage": {
+          "TransactionID": {
+            "S": "TX-99881-A"
+          },
+          "Amount": {
+            "N": "1450.75"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+## Lambda Handler Implementation
+
+```python
+import json
+
+def lambda_handler(event, context):
+    print("Initializing Stream Processing Context...")
+    print(json.dumps(event, indent=2))
+
+    for record in event["Records"]:
+        if record["eventName"] == "INSERT":
+            new_image = record["dynamodb"]["NewImage"]
+            tx_id = new_image["TransactionID"]["S"]
+            amount = new_image["Amount"]["N"]
+
+            print(f"EVENT DETECTED → Processing Financial Event: {tx_id} | Value: ${amount}")
+
+    return {"statusCode": 200, "message": "Stream event batch processed successfully."}
+```
+
+## Orchestration & Lifecycle Commands
+### Infrastructure Creation
+```bash
+terraform init
+terraform plan
+terraform apply -auto-approve
+```
+
+### Infrastructure Demolition
+```bash
+terraform destroy -auto-approve
+```
+
+## Production Hardening Roadmap
+
+- [ ] Integrate an **Amazon SQS Dead Letter Queue (DLQ)** to intercept and capture un-parseable edge cases safely.
+
 
 
