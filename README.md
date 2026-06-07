@@ -110,6 +110,8 @@ terraform destroy -auto-approve
 ## Production Hardening Roadmap
 
 - [ ] Integrate an **Amazon SQS Dead Letter Queue (DLQ)** to intercept and capture un-parseable edge cases safely.
+- [ ] Layer an **Amazon API Gateway** instance at the ingestion boundary to implement traffic throttling and edge API key validation.
+- [ ] Inject custom JSON log structured formatters inside the Lambda runtime to feed into analytical cloud dashboards.
 
 
 
